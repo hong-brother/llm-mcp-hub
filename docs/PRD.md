@@ -18,6 +18,23 @@ LLM MCP Hub
 - 기존 claude와 gemini를 구독하고 있지만 n8n등 API연계가 필요할때 별도의 API Key를 발급 받아서 추가 비용 발생을 절감 하기 위한 목적
 - MCP 생태계 확장으로 AI 에이전트/도구들이 표준화된 방식으로 LLM에 접근할 필요성 증가
 
+### 1.4 전제조건 (Constraints)
+
+> **중요: API Key 방식 사용 금지**
+
+- **LLM API Key를 절대 사용하지 않음** (Anthropic API Key, Google AI API Key 등)
+- 이유: API Key 사용 시 사용량에 따른 별도 비용이 발생하므로, 기존 구독 플랜의 비용 절감 목적에 위배됨
+- 대신 **CLI 기반 OAuth 인증** 방식을 사용하여 기존 구독(Claude Pro/Max, Gemini Advanced 등)을 활용
+- Docker 컨테이너 환경에서 CLI 인증 토큰을 관리하여 subprocess로 LLM CLI 실행
+
+| 인증 방식 | 사용 여부 | 비고 |
+|-----------|----------|------|
+| Anthropic API Key | **금지** | 사용량 기반 과금 |
+| Google AI API Key | **금지** | 사용량 기반 과금 |
+| Claude CLI OAuth | **사용** | 구독 플랜 활용 |
+| Gemini CLI OAuth | **사용** | 구독 플랜 활용 |
+| Long-lived Access Token | **사용** | CLI 인증 토큰 |
+
 ---
 
 ## 2. 목표 (Goals)

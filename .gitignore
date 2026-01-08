@@ -1,0 +1,88 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual environments
+.venv/
+venv/
+ENV/
+env/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.nox/
+
+# ============================================
+# SECURITY - 민감한 파일 (절대 커밋 금지)
+# ============================================
+
+# Environment files (may contain secrets)
+.env
+.env.*
+!.env.example
+
+# OAuth credentials (Claude/Gemini CLI)
+.claude/
+.gemini/
+**/credentials.json
+**/auth.json
+**/oauth_creds.json
+**/*_credentials.json
+**/*_token.json
+
+# API Keys
+*.key
+*.pem
+*.p12
+
+# Azure secrets
+azure-credentials.json
+serviceprincipal.json
+
+# Docker secrets
+docker-compose.override.yml
+secrets/
+
+# Logs (may contain sensitive info)
+*.log
+logs/
+
+# Local development
+local/
+tmp/
+temp/
+
+# Redis dump
+dump.rdb
