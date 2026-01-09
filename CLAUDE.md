@@ -2,7 +2,7 @@
 
 ## Project Overview
 - **Name**: LLM MCP Hub
-- **Purpose**: 여러 LLM 프로바이더(Claude, Gemini 등)를 subprocess 기반으로 통합하여 REST API 및 MCP 서버로 제공하는 허브 시스템
+- **Purpose**: 여러 LLM 프로바이더(Claude, Gemini 등)를 **SDK/API 기반**으로 통합하여 REST API 및 MCP 서버로 제공하는 허브 시스템
 - **Key Goal**: 기존 Claude/Gemini 구독을 활용하여 n8n 등 API 연계 시 추가 비용 발생 절감
 
 ## Critical Constraints (전제조건)
@@ -11,39 +11,91 @@
 
 - Anthropic API Key, Google AI API Key 등 **LLM API Key 사용 금지**
 - 이유: 사용량 기반 별도 비용 발생 → 구독 플랜 비용 절감 목적에 위배
-- **CLI 기반 OAuth 인증**으로 기존 구독(Claude Pro/Max, Gemini Advanced) 활용
-- Docker 컨테이너에서 CLI 인증 토큰 관리 → subprocess로 LLM CLI 실행
+- **Claude Agent SDK + OAuth 토큰**으로 기존 구독(Claude Pro/Max) 활용
+- **Gemini CLI + PTY 래퍼**로 기존 구독(Gemini Advanced) 활용
+- Docker 컨테이너에서 OAuth 토큰을 환경변수로 관리
 
 | 인증 방식 | 허용 | 비고 |
 |-----------|------|------|
 | Anthropic API Key | X | 사용량 과금 |
 | Google AI API Key | X | 사용량 과금 |
-| Claude CLI OAuth | O | 구독 플랜 활용 |
-| Gemini CLI OAuth | O | 구독 플랜 활용 |
-| Long-lived Access Token | O | CLI 인증 토큰 |
+| Claude Agent SDK + OAuth Token | O | 구독 플랜 활용 (권장) |
+| Gemini CLI + PTY Wrapper | O | 구독 플랜 활용 |
+| `CLAUDE_CODE_OAUTH_TOKEN` 환경변수 | O | SDK 인증용 |
 
 ## Tech Stack
 | Area | Technology | Reason |
 |------|------------|--------|
-| Language | Python 3.11+ | asyncio, subprocess 지원 |
+| Language | Python 3.11+ | asyncio, 타입 힌트 지원 |
 | Package Manager | uv | 빠른 의존성 설치, lockfile 지원 |
 | Framework | FastAPI | 비동기, OpenAPI 자동 생성 |
+| **Claude Provider** | **claude-agent-sdk** | 공식 SDK, OAuth 지원, TTY 불필요 |
+| **Gemini Provider** | **ptyprocess + gemini-cli** | PTY 래퍼로 CLI 제어 |
 | MCP Server | mcp (Python SDK) | 공식 MCP Python SDK |
-| Process Mgmt | asyncio.subprocess | 네이티브 비동기 subprocess |
 | Config | Pydantic Settings | 타입 안전한 설정 관리 |
 | Session Store | Redis | 분산 환경 지원, TTL 기반 만료 |
 
-## Architecture Layers
+## Architecture
+
+### 시스템 구성도
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                         Clients                                  │
+│  ┌─────────────────┐  ┌─────────────────┐  ┌─────────────────┐  │
+│  │  REST API       │  │  MCP Clients    │  │  n8n Workflow   │  │
+│  │  (curl, etc.)   │  │  (Claude Desktop│  │                 │  │
+│  │                 │  │   Cursor)       │  │                 │  │
+│  └────────┬────────┘  └────────┬────────┘  └────────┬────────┘  │
+└───────────┼─────────────────────┼─────────────────────┼─────────┘
+            │                     │                     │
+            ▼                     ▼                     ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                        LLM MCP Hub                               │
+├─────────────────────────────────────────────────────────────────┤
+│  Presentation Layer                                              │
+│  ┌──────────────────────┐  ┌──────────────────────────────────┐ │
+│  │ REST API (FastAPI)   │  │ MCP Server (stdio/SSE)           │ │
+│  │ POST /v1/chat/...    │  │ Tools: chat, list_providers      │ │
+│  │ GET  /v1/sessions/.. │  │ Resources: provider://, session://│ │
+│  └──────────────────────┘  └──────────────────────────────────┘ │
+├─────────────────────────────────────────────────────────────────┤
+│  Service Layer                                                   │
+│  ┌──────────────────────┐  ┌──────────────────────────────────┐ │
+│  │ ChatService          │  │ SessionService                   │ │
+│  │ - route_to_provider  │  │ - create/get/delete session      │ │
+│  │ - handle_streaming   │  │ - manage message history         │ │
+│  └──────────────────────┘  └──────────────────────────────────┘ │
+├─────────────────────────────────────────────────────────────────┤
+│  Infrastructure Layer                                            │
+│  ┌────────────────┐  ┌────────────────┐  ┌────────────────────┐ │
+│  │ Claude Adapter │  │ Gemini Adapter │  │ Session Store      │ │
+│  │ (Agent SDK)    │  │ (PTY + CLI)    │  │ (Redis)            │ │
+│  │                │  │                │  │                    │ │
+│  │ OAuth Token    │  │ OAuth Token    │  │ TTL: 1 hour        │ │
+│  │ 환경변수 인증  │  │ 파일 마운트    │  │                    │ │
+│  └───────┬────────┘  └───────┬────────┘  └────────────────────┘ │
+└──────────┼───────────────────┼──────────────────────────────────┘
+           │                   │
+           ▼                   ▼
+    ┌─────────────┐     ┌─────────────┐
+    │ Claude API  │     │ Gemini API  │
+    │ (claude.ai) │     │ (Google)    │
+    │ Pro/Max 구독│     │ Advanced 구독│
+    └─────────────┘     └─────────────┘
+```
+
+### Architecture Layers
 1. **Presentation Layer**: REST API (FastAPI) + MCP Server (mcp SDK)
 2. **Service Layer**: ChatService, SessionService
-3. **Infrastructure Layer**: Session Store (Redis), Provider Registry, Worker Manager
+3. **Infrastructure Layer**: Provider Adapters (Claude SDK, Gemini PTY), Session Store (Redis)
 
 ## Key Features (Priority)
 ### P0 (Critical)
-- Claude/Gemini subprocess 실행/관리
+- **Claude Agent SDK 통합** (OAuth 토큰 인증)
+- **Gemini CLI PTY 래퍼** (OAuth 토큰 인증)
 - REST API 엔드포인트 제공
-- 요청 라우팅
-- subprocess 생명주기 관리
+- Provider 라우팅
 - HTTP 헤더 기반 세션 ID (`X-Session-ID`)
 - Redis 기반 세션 저장소
 - 대화 기록 세션 저장
@@ -52,10 +104,9 @@
 
 ### P1 (Important)
 - Provider 상태 모니터링
-- 스트리밍 응답 지원
+- 스트리밍 응답 지원 (AsyncIterator)
 - 인증/인가
-- 프로세스 풀 관리
-- 자동 재시작 (crash recovery)
+- 토큰 만료 감지 및 알림
 - 세션 만료 관리 (TTL: 1시간)
 - `list_providers`, `get_session` Tool
 
@@ -65,12 +116,74 @@
 - 세션 조회/삭제 API
 - MCP Resources, Prompts
 
+## Claude Provider 구현 (Agent SDK)
+
+### 환경변수
+```bash
+# OAuth 토큰 (필수)
+CLAUDE_CODE_OAUTH_TOKEN=your-oauth-token-here
+
+# 모델 선택 (선택)
+CLAUDE_MODEL=claude-sonnet-4-5-20250929
+```
+
+### 코드 예시
+```python
+import anyio
+from claude_agent_sdk import query, ClaudeSDKClient
+
+# 단순 쿼리
+async def simple_chat(prompt: str) -> str:
+    result = []
+    async for message in query(prompt=prompt):
+        result.append(str(message))
+    return "".join(result)
+
+# 대화형 세션
+async def interactive_chat():
+    async with ClaudeSDKClient() as client:
+        response = await client.send("Hello!")
+        return response
+```
+
+## Gemini Provider 구현 (PTY Wrapper)
+
+### 환경변수
+```bash
+# OAuth 토큰 파일 경로
+GEMINI_AUTH_PATH=/mnt/auth/gemini/oauth_creds.json
+```
+
+### 코드 예시
+```python
+from ptyprocess import PtyProcess
+import json
+
+class GeminiPTYAdapter:
+    def __init__(self, auth_path: str):
+        self.auth_path = auth_path
+
+    async def chat(self, prompt: str) -> str:
+        proc = PtyProcess.spawn(
+            ["gemini", "-p", prompt],
+            env={"HOME": "/root"}  # credentials 위치
+        )
+        output = ""
+        while proc.isalive():
+            try:
+                output += proc.read(1024).decode()
+            except EOFError:
+                break
+        return output
+```
+
 ## API Endpoints
 - `POST /v1/chat/completions` - 통합 채팅 완성 요청
 - `GET /v1/sessions/{session_id}` - 세션 정보 조회
 - `DELETE /v1/sessions/{session_id}` - 세션 삭제
 - `GET /v1/providers` - Provider 목록
 - `GET /health` - 헬스체크
+- `GET /health/tokens` - OAuth 토큰 상태 확인
 
 ## MCP Tools
 - `chat` - LLM에 대화 요청
@@ -88,17 +201,33 @@ llm-mcp-hub/
 ├── src/llm_mcp_hub/
 │   ├── main.py              # FastAPI 앱 진입점
 │   ├── core/                # 설정 및 공통 모듈
+│   │   ├── config.py        # Pydantic Settings
+│   │   ├── exceptions.py    # 커스텀 예외
+│   │   └── dependencies.py  # DI 컨테이너
 │   ├── domain/              # 도메인 모델
+│   │   ├── message.py
+│   │   └── session.py
 │   ├── infrastructure/      # 외부 시스템 연동
 │   │   ├── session/         # 세션 저장소 (Redis/Memory)
-│   │   ├── providers/       # LLM Provider (Claude/Gemini)
-│   │   └── workers/         # subprocess 관리
+│   │   │   ├── base.py
+│   │   │   ├── redis.py
+│   │   │   └── memory.py
+│   │   └── providers/       # LLM Provider Adapters
+│   │       ├── base.py      # Provider 추상 클래스
+│   │       ├── claude.py    # Claude Agent SDK Adapter
+│   │       └── gemini.py    # Gemini PTY Adapter
 │   ├── api/v1/              # REST API
+│   │   ├── router.py
+│   │   ├── chat.py
+│   │   ├── sessions.py
+│   │   └── providers.py
 │   ├── mcp/                 # MCP Server
-│   │   ├── tools/           # MCP Tools
-│   │   ├── resources/       # MCP Resources
-│   │   └── prompts/         # MCP Prompts
+│   │   ├── server.py
+│   │   ├── tools/
+│   │   └── resources/
 │   └── services/            # 비즈니스 서비스
+│       ├── chat.py
+│       └── session.py
 └── tests/
 ```
 
@@ -110,8 +239,8 @@ llm-mcp-hub/
 5. **테스트 용이성**: 인메모리 구현체로 테스트 가능
 
 ## Development Phases
-1. **Phase 1: Foundation** - 프로젝트 설정, FastAPI, Redis, subprocess 관리
-2. **Phase 2: Provider Integration** - Claude/Gemini Provider, REST API
+1. **Phase 1: Foundation** - 프로젝트 설정, FastAPI, Redis, Claude SDK 연동
+2. **Phase 2: Provider Integration** - Gemini PTY Adapter, REST API
 3. **Phase 3: MCP Server** - MCP 서버, Tools, Resources, stdio/SSE
 4. **Phase 4: Production Ready** - 에러 핸들링, 로깅, 테스트, 문서화
 
@@ -121,3 +250,4 @@ llm-mcp-hub/
 - 지원 LLM: 2개 이상 (Claude, Gemini)
 - MCP 클라이언트: Claude Desktop, Cursor 연동
 - 세션 유지: 1시간 TTL
+- 토큰 갱신 주기: 1~2주 (알림 자동화)
