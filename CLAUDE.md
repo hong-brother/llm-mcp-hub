@@ -19,9 +19,19 @@
 |-----------|------|------|
 | Anthropic API Key | X | 사용량 과금 |
 | Google AI API Key | X | 사용량 과금 |
+| Google GenAI SDK (`google-genai`) | X | API 과금 기반, 구독 활용 불가 |
 | Claude Agent SDK + OAuth Token | O | 구독 플랜 활용 (권장) |
 | Gemini CLI + PTY Wrapper | O | 구독 플랜 활용 |
 | `CLAUDE_CODE_OAUTH_TOKEN` 환경변수 | O | SDK 인증용 |
+
+### Provider별 구현 방식 선택 이유
+
+| Provider | 방식 | 이유 |
+|----------|------|------|
+| **Claude** | Agent SDK | 공식 SDK가 OAuth 토큰을 지원하고 구독 플랜 활용 가능, TTY 불필요 |
+| **Gemini** | CLI + PTY | Google GenAI SDK는 API 과금 기반이라 구독 활용 불가, CLI만 구독 활용 가능 |
+
+> **참고**: Google GenAI SDK (`pip install google-genai`)가 존재하지만, API Key 기반 과금 체계를 사용하므로 Gemini Advanced 구독을 활용할 수 없습니다. 따라서 CLI + PTY 래퍼 방식만 사용합니다.
 
 ## Tech Stack
 | Area | Technology | Reason |
@@ -148,22 +158,41 @@ async def interactive_chat():
 
 ## Gemini Provider 구현 (PTY Wrapper)
 
+### TTY 문제와 해결책
+
+Gemini CLI는 인터랙티브 터미널(TTY)을 요구합니다. Docker 컨테이너에서 subprocess로 CLI를 호출하면 TTY가 없어 오류가 발생합니다.
+
+```
+# 문제: subprocess.run()은 TTY를 제공하지 않음
+subprocess.run(["gemini", "-p", "Hello"])  # TTY 오류 발생
+```
+
+**해결책**: `ptyprocess` 라이브러리로 가상 터미널(PTY)을 생성하여 CLI가 실제 터미널에서 실행되는 것처럼 동작하게 합니다.
+
 ### 환경변수
 ```bash
-# OAuth 토큰 파일 경로
+# OAuth 토큰 파일 경로 (필수)
 GEMINI_AUTH_PATH=/mnt/auth/gemini/oauth_creds.json
+
+# 모델 선택 (선택, 기본값: gemini-2.5-pro)
+GEMINI_MODEL=gemini-2.5-pro
 ```
 
 ### 코드 예시
 ```python
+import asyncio
 from ptyprocess import PtyProcess
-import json
 
 class GeminiPTYAdapter:
     def __init__(self, auth_path: str):
         self.auth_path = auth_path
 
     async def chat(self, prompt: str) -> str:
+        # PtyProcess는 동기 코드이므로 asyncio.to_thread()로 래핑
+        return await asyncio.to_thread(self._sync_chat, prompt)
+
+    def _sync_chat(self, prompt: str) -> str:
+        """동기 PTY 실행"""
         proc = PtyProcess.spawn(
             ["gemini", "-p", prompt],
             env={"HOME": "/root"}  # credentials 위치
