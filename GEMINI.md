@@ -110,7 +110,7 @@ The project is divided into several key functional areas:
 -   **Provider Management:** Implementing Claude Agent SDK adapter and Gemini PTY adapter
 -   **API Gateway:** Building REST endpoints (e.g., `/v1/chat/completions`, `/v1/sessions/...`)
 -   **MCP Server:** Implementing MCP tools (`chat`, `list_providers`) and resources
--   **Session Management:** Handling conversation context and state via `X-Session-ID` headers and Redis
+-   **Session Management:** Handling stateful conversations via `X-Session-ID` and Redis. This includes advanced features like injecting context at session creation (e.g., system prompts, files) and exporting session history/summaries to maintain context across long-running interactions.
 -   **Token Management:** OAuth token health check and expiration alerts
 
 ## 6. OAuth Token Management
@@ -123,5 +123,6 @@ The project is divided into several key functional areas:
 ## 7. Key Documents
 
 -   **Full Product Requirements:** [docs/PRD.md](docs/PRD.md)
+-   **API Specification:** [docs/API.md](docs/API.md)
 -   **Token Generation Guide:** [docs/토큰생성방법.md](docs/토큰생성방법.md)
 -   **Azure Deployment Guide:** [docs/azure-cloud-container.md](docs/azure-cloud-container.md)
