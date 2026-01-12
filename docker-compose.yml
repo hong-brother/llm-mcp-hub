@@ -1,0 +1,16 @@
+services:
+  poc-test:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      # Claude OAuth 토큰 (호스트 환경변수에서 가져옴)
+      - CLAUDE_CODE_OAUTH_TOKEN=${CLAUDE_CODE_OAUTH_TOKEN}
+      # Gemini 인증 파일 경로 (컨테이너 내부)
+      - GEMINI_AUTH_PATH=/root/.gemini/oauth_creds.json
+    volumes:
+      # Gemini 인증 파일 마운트 (rw: CLI가 google_accounts.json 쓰기 필요)
+      - ${HOME}/.gemini:/root/.gemini:rw
+    # TTY 활성화 (PTY 테스트용)
+    tty: true
+    stdin_open: true

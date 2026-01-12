@@ -28,13 +28,13 @@ LLM MCP Hub
 - **Gemini**: `ptyprocess` + Gemini CLI로 기존 구독(Gemini Advanced) 활용
 - Docker 컨테이너 환경에서 OAuth 토큰을 환경변수/파일로 관리
 
-| 인증 방식 | 사용 여부 | 비고 |
-|-----------|----------|------|
-| Anthropic API Key | **금지** | 사용량 기반 과금 |
-| Google AI API Key | **금지** | 사용량 기반 과금 |
-| Claude Agent SDK + OAuth | **사용** | 구독 플랜 활용, TTY 불필요 |
-| Gemini CLI + PTY Wrapper | **사용** | 구독 플랜 활용 |
-| `CLAUDE_CODE_OAUTH_TOKEN` 환경변수 | **사용** | SDK 인증용 |
+| 인증 방식                          | 사용 여부 | 비고                       |
+| ---------------------------------- | --------- | -------------------------- |
+| Anthropic API Key                  | **금지**  | 사용량 기반 과금           |
+| Google AI API Key                  | **금지**  | 사용량 기반 과금           |
+| Claude Agent SDK + OAuth           | **사용**  | 구독 플랜 활용, TTY 불필요 |
+| Gemini CLI + PTY Wrapper           | **사용**  | 구독 플랜 활용             |
+| `CLAUDE_CODE_OAUTH_TOKEN` 환경변수 | **사용**  | SDK 인증용                 |
 
 ---
 
@@ -50,14 +50,14 @@ LLM MCP Hub
 
 ### 2.2 성공 지표
 
-| 지표              | 목표값                        |
-| ----------------- | ----------------------------- |
-| API 응답 시간     | < 100ms (LLM 응답 제외)       |
-| 가용성            | 99.9%                         |
-| 지원 LLM 수       | 2개 이상 (Claude, Gemini)     |
-| MCP 클라이언트    | Claude Desktop, Cursor 연동   |
-| 세션 유지         | 1시간 TTL, 대화 컨텍스트 유지 |
-| 토큰 갱신 알림    | 만료 3일 전 자동 알림         |
+| 지표           | 목표값                        |
+| -------------- | ----------------------------- |
+| API 응답 시간  | < 100ms (LLM 응답 제외)       |
+| 가용성         | 99.9%                         |
+| 지원 LLM 수    | 2개 이상 (Claude, Gemini)     |
+| MCP 클라이언트 | Claude Desktop, Cursor 연동   |
+| 세션 유지      | 1시간 TTL, 대화 컨텍스트 유지 |
+| 토큰 갱신 알림 | 만료 3일 전 자동 알림         |
 
 ---
 
@@ -84,12 +84,12 @@ LLM MCP Hub
 
 #### F1: LLM Provider 관리
 
-| ID   | 기능                             | 우선순위 | 상태   |
-| ---- | -------------------------------- | -------- | ------ |
-| F1.1 | Claude Agent SDK 연동            | P0       | 미착수 |
-| F1.2 | Gemini PTY Wrapper 연동          | P0       | 미착수 |
-| F1.3 | Provider 상태 모니터링           | P1       | 미착수 |
-| F1.4 | 동적 Provider 추가/제거          | P2       | 미착수 |
+| ID   | 기능                    | 우선순위 | 상태   |
+| ---- | ----------------------- | -------- | ------ |
+| F1.1 | Claude Agent SDK 연동   | P0       | 미착수 |
+| F1.2 | Gemini PTY Wrapper 연동 | P0       | 미착수 |
+| F1.3 | Provider 상태 모니터링  | P1       | 미착수 |
+| F1.4 | 동적 Provider 추가/제거 | P2       | 미착수 |
 
 #### F2: API Gateway
 
@@ -102,12 +102,12 @@ LLM MCP Hub
 
 #### F3: OAuth 토큰 관리
 
-| ID   | 기능                                    | 우선순위 | 상태   |
-| ---- | --------------------------------------- | -------- | ------ |
-| F3.1 | Claude OAuth 토큰 환경변수 관리         | P0       | 미착수 |
-| F3.2 | Gemini OAuth 토큰 파일 마운트 관리      | P0       | 미착수 |
-| F3.3 | 토큰 만료 감지 및 헬스체크              | P1       | 미착수 |
-| F3.4 | 토큰 만료 알림 (Slack/Email)            | P1       | 미착수 |
+| ID   | 기능                               | 우선순위 | 상태   |
+| ---- | ---------------------------------- | -------- | ------ |
+| F3.1 | Claude OAuth 토큰 환경변수 관리    | P0       | 미착수 |
+| F3.2 | Gemini OAuth 토큰 파일 마운트 관리 | P0       | 미착수 |
+| F3.3 | 토큰 만료 감지 및 헬스체크         | P1       | 미착수 |
+| F3.4 | 토큰 만료 알림 (Slack/Email)       | P1       | 미착수 |
 
 #### F4: 세션 관리
 
@@ -121,14 +121,14 @@ LLM MCP Hub
 
 #### F5: MCP Server
 
-| ID   | 기능                                    | 우선순위 | 상태   |
-| ---- | --------------------------------------- | -------- | ------ |
-| F5.1 | MCP 서버 구현 (stdio/SSE 전송)          | P0       | 미착수 |
-| F5.2 | `chat` Tool 제공 (LLM 대화 요청)        | P0       | 미착수 |
-| F5.3 | `list_providers` Tool 제공              | P1       | 미착수 |
-| F5.4 | `get_session` Tool 제공 (세션 조회)     | P1       | 미착수 |
-| F5.5 | Resource 제공 (Provider 정보, 세션)     | P2       | 미착수 |
-| F5.6 | Prompt 템플릿 제공                      | P2       | 미착수 |
+| ID   | 기능                                | 우선순위 | 상태   |
+| ---- | ----------------------------------- | -------- | ------ |
+| F5.1 | MCP 서버 구현 (stdio/SSE 전송)      | P0       | 미착수 |
+| F5.2 | `chat` Tool 제공 (LLM 대화 요청)    | P0       | 미착수 |
+| F5.3 | `list_providers` Tool 제공          | P1       | 미착수 |
+| F5.4 | `get_session` Tool 제공 (세션 조회) | P1       | 미착수 |
+| F5.5 | Resource 제공 (Provider 정보, 세션) | P2       | 미착수 |
+| F5.6 | Prompt 템플릿 제공                  | P2       | 미착수 |
 
 ---
 
@@ -159,16 +159,16 @@ LLM MCP Hub
 
 ### 6.1 제안 스택
 
-| 영역            | 기술                  | 선택 이유                                |
-| --------------- | --------------------- | ---------------------------------------- |
-| Language        | Python 3.11+          | asyncio, 타입 힌트 지원                  |
-| Package Manager | uv                    | 빠른 의존성 설치, lockfile 지원          |
-| Framework       | FastAPI               | 비동기, OpenAPI 자동 생성                |
-| **Claude**      | **claude-agent-sdk**  | 공식 SDK, OAuth 지원, TTY 불필요         |
-| **Gemini**      | **ptyprocess + CLI**  | PTY 래퍼로 CLI 제어, OAuth 토큰 사용     |
-| MCP Server      | mcp (Python SDK)      | 공식 MCP Python SDK, stdio/SSE 지원      |
-| Config          | Pydantic Settings     | 타입 안전한 설정 관리                    |
-| Session Store   | Redis                 | 분산 환경 지원, TTL 기반 만료            |
+| 영역            | 기술                 | 선택 이유                            |
+| --------------- | -------------------- | ------------------------------------ |
+| Language        | Python 3.11+         | asyncio, 타입 힌트 지원              |
+| Package Manager | uv                   | 빠른 의존성 설치, lockfile 지원      |
+| Framework       | FastAPI              | 비동기, OpenAPI 자동 생성            |
+| **Claude**      | **claude-agent-sdk** | 공식 SDK, OAuth 지원, TTY 불필요     |
+| **Gemini**      | **ptyprocess + CLI** | PTY 래퍼로 CLI 제어, OAuth 토큰 사용 |
+| MCP Server      | mcp (Python SDK)     | 공식 MCP Python SDK, stdio/SSE 지원  |
+| Config          | Pydantic Settings    | 타입 안전한 설정 관리                |
+| Session Store   | Redis                | 분산 환경 지원, TTL 기반 만료        |
 
 ### 6.2 주요 의존성
 
@@ -248,18 +248,21 @@ dependencies = [
 ### 8.1 Claude Provider (Agent SDK)
 
 **장점:**
+
 - 공식 SDK로 안정적
 - TTY 불필요 (컨테이너 친화적)
 - OAuth 토큰 환경변수로 간편 설정
 - AsyncIterator로 스트리밍 지원
 
 **환경변수:**
+
 ```bash
 CLAUDE_CODE_OAUTH_TOKEN=your-oauth-token-here
 CLAUDE_MODEL=claude-sonnet-4-5-20250929
 ```
 
 **구현 예시:**
+
 ```python
 import anyio
 from claude_agent_sdk import query, ClaudeSDKClient
@@ -284,17 +287,20 @@ class ClaudeAdapter:
 ### 8.2 Gemini Provider (PTY Wrapper)
 
 **배경:**
+
 - Gemini CLI는 TTY가 필요함
 - 컨테이너 환경에서 TTY가 없어 직접 subprocess 호출 불가
 - `ptyprocess` 라이브러리로 가상 TTY 생성하여 해결
 
 **환경변수:**
+
 ```bash
 GEMINI_AUTH_PATH=/mnt/auth/gemini/oauth_creds.json
 GEMINI_MODEL=gemini-2.5-pro
 ```
 
 **구현 예시:**
+
 ```python
 from ptyprocess import PtyProcess
 import os
@@ -421,6 +427,7 @@ X-Session-ID: abc123-def456-...
 세션 삭제
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -433,6 +440,7 @@ X-Session-ID: abc123-def456-...
 사용 가능한 Provider 목록
 
 **Response:**
+
 ```json
 {
   "providers": [
@@ -457,6 +465,7 @@ X-Session-ID: abc123-def456-...
 헬스체크
 
 **Response:**
+
 ```json
 {
   "status": "healthy",
@@ -474,6 +483,7 @@ X-Session-ID: abc123-def456-...
 OAuth 토큰 상태 확인
 
 **Response:**
+
 ```json
 {
   "claude": {
@@ -507,6 +517,7 @@ OAuth 토큰 상태 확인
 ### 10.2 Tools
 
 #### chat
+
 LLM에 대화 요청
 
 ```json
@@ -540,6 +551,7 @@ LLM에 대화 요청
 ```
 
 #### list_providers
+
 사용 가능한 Provider 목록 조회
 
 ```json
@@ -554,6 +566,7 @@ LLM에 대화 요청
 ```
 
 #### get_session
+
 세션 정보 조회
 
 ```json
@@ -575,30 +588,31 @@ LLM에 대화 요청
 
 ### 10.3 Resources
 
-| URI 패턴                     | 설명                    |
-| ---------------------------- | ----------------------- |
-| `provider://list`            | Provider 목록           |
-| `provider://{name}`          | 특정 Provider 상세 정보 |
-| `session://{session_id}`     | 세션 정보 및 대화 기록  |
+| URI 패턴                 | 설명                    |
+| ------------------------ | ----------------------- |
+| `provider://list`        | Provider 목록           |
+| `provider://{name}`      | 특정 Provider 상세 정보 |
+| `session://{session_id}` | 세션 정보 및 대화 기록  |
 
 ### 10.4 Prompts
 
-| 이름              | 설명                              |
-| ----------------- | --------------------------------- |
-| `summarize`       | 대화 내용 요약 요청               |
-| `translate`       | 번역 요청 (언어 지정)             |
-| `code_review`     | 코드 리뷰 요청                    |
+| 이름          | 설명                  |
+| ------------- | --------------------- |
+| `summarize`   | 대화 내용 요약 요청   |
+| `translate`   | 번역 요청 (언어 지정) |
+| `code_review` | 코드 리뷰 요청        |
 
 ### 10.5 전송 방식
 
-| 방식  | 용도                                      |
-| ----- | ----------------------------------------- |
-| stdio | Claude Desktop, 로컬 CLI 연동             |
-| SSE   | 웹 기반 클라이언트, 원격 연동             |
+| 방식  | 용도                          |
+| ----- | ----------------------------- |
+| stdio | Claude Desktop, 로컬 CLI 연동 |
+| SSE   | 웹 기반 클라이언트, 원격 연동 |
 
 ### 10.6 클라이언트 설정 예시
 
 **Claude Desktop (`claude_desktop_config.json`)**:
+
 ```json
 {
   "mcpServers": {
@@ -753,15 +767,15 @@ llm-mcp-hub/
 
 ## 13. 리스크 및 고려사항 (Risks & Considerations)
 
-| 리스크                    | 영향도 | 대응 방안                                    |
-| ------------------------- | ------ | -------------------------------------------- |
-| OAuth 토큰 만료           | 높음   | 헬스체크 API, 만료 알림, 1~2주 갱신 주기     |
-| Gemini PTY 불안정         | 중간   | 재시도 로직, 타임아웃 설정, 에러 파싱        |
-| API Rate Limit            | 높음   | Provider별 rate limiting, 큐잉               |
-| Redis 연결 장애           | 높음   | 연결 풀링, 재연결 로직, 헬스체크             |
-| MCP 프로토콜 버전 변경    | 중간   | SDK 버전 고정, 호환성 테스트                 |
-| 세션 데이터 유실          | 중간   | Redis 영속성 설정, 백업 전략                 |
-| Claude SDK 버그           | 중간   | SDK 버전 고정, 이슈 모니터링                 |
+| 리스크                 | 영향도 | 대응 방안                                |
+| ---------------------- | ------ | ---------------------------------------- |
+| OAuth 토큰 만료        | 높음   | 헬스체크 API, 만료 알림, 1~2주 갱신 주기 |
+| Gemini PTY 불안정      | 중간   | 재시도 로직, 타임아웃 설정, 에러 파싱    |
+| API Rate Limit         | 높음   | Provider별 rate limiting, 큐잉           |
+| Redis 연결 장애        | 높음   | 연결 풀링, 재연결 로직, 헬스체크         |
+| MCP 프로토콜 버전 변경 | 중간   | SDK 버전 고정, 호환성 테스트             |
+| 세션 데이터 유실       | 중간   | Redis 영속성 설정, 백업 전략             |
+| Claude SDK 버그        | 중간   | SDK 버전 고정, 이슈 모니터링             |
 
 ---
 
@@ -781,10 +795,10 @@ llm-mcp-hub/
 
 ## 15. 변경 이력 (Changelog)
 
-| 버전 | 날짜       | 작성자 | 변경 내용                                                                             |
-| ---- | ---------- | ------ | ------------------------------------------------------------------------------------- |
-| 0.1  | 2026-01-05 | -      | 초안 작성                                                                             |
-| 0.2  | 2026-01-05 | -      | 세션 관리 기능 추가 (F4), 기술 스택에 uv/Redis 추가, 확장성 고려한 프로젝트 구조 변경 |
-| 0.3  | 2026-01-05 | -      | MCP Server 지원 추가 (F5), MCP 명세 섹션 추가, 아키텍처 및 프로젝트 구조에 MCP 레이어 반영 |
-| 0.4  | 2026-01-05 | -      | 문서 검토: 성공 지표/리스크에 MCP/Redis 항목 추가, API 명세 보완, workers 모듈 추가 |
+| 버전 | 날짜       | 작성자 | 변경 내용                                                                                                                                            |
+| ---- | ---------- | ------ | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 0.1  | 2026-01-05 | -      | 초안 작성                                                                                                                                            |
+| 0.2  | 2026-01-05 | -      | 세션 관리 기능 추가 (F4), 기술 스택에 uv/Redis 추가, 확장성 고려한 프로젝트 구조 변경                                                                |
+| 0.3  | 2026-01-05 | -      | MCP Server 지원 추가 (F5), MCP 명세 섹션 추가, 아키텍처 및 프로젝트 구조에 MCP 레이어 반영                                                           |
+| 0.4  | 2026-01-05 | -      | 문서 검토: 성공 지표/리스크에 MCP/Redis 항목 추가, API 명세 보완, workers 모듈 추가                                                                  |
 | 0.5  | 2026-01-09 | -      | **아키텍처 변경**: subprocess → SDK 기반으로 전환. Claude Agent SDK + Gemini PTY Wrapper 도입. OAuth 토큰 관리 방식 상세화. TTY 문제 해결 방안 반영. |

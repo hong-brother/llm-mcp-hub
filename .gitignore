@@ -26,6 +26,16 @@ venv/
 ENV/
 env/
 
+# uv
+.uv/
+
+# Type checking
+.mypy_cache/
+.pytype/
+
+# Node.js
+node_modules/
+
 # IDE
 .idea/
 .vscode/
